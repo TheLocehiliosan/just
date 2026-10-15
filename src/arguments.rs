@@ -29,13 +29,12 @@ use {
 pub struct Arguments {
   #[arg(
     conflicts_with = "no_aliases",
-    default_value = "right",
     env = "JUST_ALIAS_STYLE",
     help = "Set list command alias display style",
     long,
     value_enum
   )]
-  pub(crate) alias_style: AliasStyle,
+  pub(crate) alias_style: Option<AliasStyle>,
   #[arg(
     env = "JUST_ALLOW_MISSING",
     help = "Ignore missing recipe and module errors",
@@ -216,21 +215,19 @@ pub struct Arguments {
   )]
   pub(crate) justfile_names: Option<Vec<String>>,
   #[arg(
-    default_value = Self::DEFAULT_LIST_HEADING,
     env = "JUST_LIST_HEADING",
     help = "Print <TEXT> before list",
     long,
     value_name = "TEXT"
   )]
-  pub(crate) list_heading: String,
+  pub(crate) list_heading: Option<String>,
   #[arg(
-    default_value = Self::DEFAULT_LIST_PREFIX,
     env = "JUST_LIST_PREFIX",
     help = "Print <TEXT> before each list item",
     long,
     value_name = "TEXT"
   )]
-  pub(crate) list_prefix: String,
+  pub(crate) list_prefix: Option<String>,
   #[arg(
     env = "JUST_LIST_SUBMODULES",
     help = "List recipes in submodules",
@@ -238,8 +235,15 @@ pub struct Arguments {
     requires = "list"
   )]
   pub(crate) list_submodules: bool,
-  #[arg(env = "JUST_NO_ALIASES", help = "Don't show aliases in list", long)]
-  pub(crate) no_aliases: bool,
+  #[arg(
+    default_missing_value = "true",
+    env = "JUST_NO_ALIASES",
+    help = "Don't show aliases in list",
+    long,
+    num_args = 0..=1,
+    require_equals = true
+  )]
+  pub(crate) no_aliases: Option<bool>,
   #[arg(env = "JUST_NO_CACHE", help = "Bypass recipe cache", long)]
   pub(crate) no_cache: bool,
   #[arg(
@@ -316,12 +320,15 @@ pub struct Arguments {
   )]
   pub(crate) timestamp_format: String,
   #[arg(
+    default_missing_value = "true",
     env = "JUST_UNSORTED",
     help = "Return list and summary entries in source order",
     long,
+    num_args = 0..=1,
+    require_equals = true,
     short = 'u'
   )]
-  pub(crate) unsorted: bool,
+  pub(crate) unsorted: Option<bool>,
   #[arg(
     env = "JUST_UNSTABLE",
     help = "Enable unstable features",

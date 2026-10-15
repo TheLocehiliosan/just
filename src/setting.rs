@@ -5,6 +5,13 @@ pub(crate) enum Setting<'src> {
   AllowDuplicateRecipes(bool),
   AllowDuplicateVariables(bool),
   DefaultList(bool),
+  DefaultListAliasStyle(Expression<'src>),
+  DefaultListGroups(Vec<Expression<'src>>),
+  DefaultListHeading(Expression<'src>),
+  DefaultListNoAliases(bool),
+  DefaultListPrefix(Expression<'src>),
+  DefaultListSubmodules(bool),
+  DefaultListUnsorted(bool),
   DefaultScript(bool),
   DotenvCommand(Expression<'src>),
   DotenvFilename(Expression<'src>),
@@ -39,6 +46,9 @@ impl<'src> Setting<'src> {
       Self::AllowDuplicateRecipes(value)
       | Self::AllowDuplicateVariables(value)
       | Self::DefaultList(value)
+      | Self::DefaultListNoAliases(value)
+      | Self::DefaultListSubmodules(value)
+      | Self::DefaultListUnsorted(value)
       | Self::DefaultScript(value)
       | Self::DotenvLoad(value)
       | Self::DotenvOverride(value)
@@ -55,19 +65,25 @@ impl<'src> Setting<'src> {
       | Self::Quiet(value)
       | Self::Unstable(value)
       | Self::WindowsPowerShell(value) => *value,
-      Self::DotenvCommand(_value)
+      Self::DefaultListAliasStyle(_value)
+      | Self::DefaultListHeading(_value)
+      | Self::DefaultListPrefix(_value)
+      | Self::DotenvCommand(_value)
       | Self::DotenvFilename(_value)
       | Self::DotenvPath(_value)
       | Self::Tempdir(_value)
       | Self::WorkingDirectory(_value) => false,
-      Self::Indentation(..) | Self::MinimumVersion(_) => false,
+      Self::DefaultListGroups(_) | Self::Indentation(..) | Self::MinimumVersion(_) => false,
       Self::ScriptInterpreter(_value) | Self::Shell(_value) | Self::WindowsShell(_value) => false,
     }
   }
 
   pub(crate) fn expressions_mut(&mut self) -> impl Iterator<Item = &mut Expression<'src>> {
     let (first, rest) = match self {
-      Self::DotenvCommand(value)
+      Self::DefaultListAliasStyle(value)
+      | Self::DefaultListHeading(value)
+      | Self::DefaultListPrefix(value)
+      | Self::DotenvCommand(value)
       | Self::DotenvFilename(value)
       | Self::DotenvPath(value)
       | Self::Tempdir(value)
@@ -76,6 +92,7 @@ impl<'src> Setting<'src> {
         Some(&mut value.command),
         Some(value.arguments.as_mut_slice()),
       ),
+      Self::DefaultListGroups(values) => (None, Some(values.as_mut_slice())),
       _ => (None, None),
     };
 
@@ -107,6 +124,9 @@ impl Display for Setting<'_> {
       Self::AllowDuplicateRecipes(value)
       | Self::AllowDuplicateVariables(value)
       | Self::DefaultList(value)
+      | Self::DefaultListNoAliases(value)
+      | Self::DefaultListSubmodules(value)
+      | Self::DefaultListUnsorted(value)
       | Self::DefaultScript(value)
       | Self::DotenvLoad(value)
       | Self::DotenvOverride(value)
@@ -123,7 +143,10 @@ impl Display for Setting<'_> {
       | Self::Quiet(value)
       | Self::Unstable(value)
       | Self::WindowsPowerShell(value) => write!(f, "{value}"),
-      Self::DotenvCommand(value)
+      Self::DefaultListAliasStyle(value)
+      | Self::DefaultListHeading(value)
+      | Self::DefaultListPrefix(value)
+      | Self::DotenvCommand(value)
       | Self::DotenvFilename(value)
       | Self::DotenvPath(value)
       | Self::Tempdir(value)
@@ -131,6 +154,16 @@ impl Display for Setting<'_> {
         write!(f, "{value}")
       }
       Self::Indentation(value, _) | Self::MinimumVersion(value) => write!(f, "{value}"),
+      Self::DefaultListGroups(values) => {
+        write!(f, "[")?;
+        for (i, value) in values.iter().enumerate() {
+          if i > 0 {
+            write!(f, ", ")?;
+          }
+          write!(f, "{value}")?;
+        }
+        write!(f, "]")
+      }
       Self::ScriptInterpreter(value) | Self::Shell(value) | Self::WindowsShell(value) => {
         write!(f, "[{value}]")
       }

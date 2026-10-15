@@ -21,6 +21,13 @@ pub(crate) struct Settings {
   pub(crate) allow_duplicate_recipes: bool,
   pub(crate) allow_duplicate_variables: bool,
   pub(crate) default_list: bool,
+  pub(crate) default_list_alias_style: Option<AliasStyle>,
+  pub(crate) default_list_groups: Vec<String>,
+  pub(crate) default_list_heading: Option<String>,
+  pub(crate) default_list_no_aliases: bool,
+  pub(crate) default_list_prefix: Option<String>,
+  pub(crate) default_list_submodules: bool,
+  pub(crate) default_list_unsorted: bool,
   pub(crate) default_script: bool,
   pub(crate) dotenv_command: Value,
   #[serde(serialize_with = "serialize_compatible")]

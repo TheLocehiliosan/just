@@ -97,6 +97,13 @@ struct Settings<'a> {
   allow_duplicate_recipes: bool,
   allow_duplicate_variables: bool,
   default_list: bool,
+  default_list_alias_style: Option<String>,
+  default_list_groups: Vec<String>,
+  default_list_heading: Option<String>,
+  default_list_no_aliases: bool,
+  default_list_prefix: Option<String>,
+  default_list_submodules: bool,
+  default_list_unsorted: bool,
   default_script: bool,
   dotenv_command: Vec<String>,
   dotenv_filename: Option<Dotenv<'a>>,
@@ -694,23 +701,30 @@ fn quiet() {
 #[test]
 fn settings() {
   case(
-    "
+    r#"
       set allow-duplicate-recipes
       set default-list
+      set default-list-alias-style := "separate"
+      set default-list-groups := ["build", "test"]
+      set default-list-heading := "Tasks:\n"
+      set default-list-no-aliases
+      set default-list-prefix := "-> "
+      set default-list-submodules
+      set default-list-unsorted
       set default-script
-      set dotenv-filename := \"filename\"
+      set dotenv-filename := "filename"
       set dotenv-load
-      set dotenv-path := \"path\"
+      set dotenv-path := "path"
       set export
       set fallback
       set ignore-comments
-      set indentation := \"  \"
+      set indentation := "  "
       set positional-arguments
       set quiet
       set shell := ['a', 'b', 'c']
       foo:
         #!bar
-    ",
+    "#,
     Module {
       first: Some("foo"),
       recipes: [(
@@ -727,6 +741,13 @@ fn settings() {
       settings: Settings {
         allow_duplicate_recipes: true,
         default_list: true,
+        default_list_alias_style: Some("separate".into()),
+        default_list_groups: vec!["build".into(), "test".into()],
+        default_list_heading: Some("Tasks:\n".into()),
+        default_list_no_aliases: true,
+        default_list_prefix: Some("-> ".into()),
+        default_list_submodules: true,
+        default_list_unsorted: true,
         default_script: true,
         dotenv_filename: Some(Dotenv::One("filename")),
         dotenv_path: Some(Dotenv::One("path")),

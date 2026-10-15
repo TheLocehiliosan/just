@@ -1607,6 +1607,11 @@ impl<'run, 'src> Parser<'run, 'src> {
         Some(Setting::AllowDuplicateVariables(self.parse_set_bool()?))
       }
       Keyword::DefaultList => Some(Setting::DefaultList(self.parse_set_bool()?)),
+      Keyword::DefaultListNoAliases => Some(Setting::DefaultListNoAliases(self.parse_set_bool()?)),
+      Keyword::DefaultListSubmodules => {
+        Some(Setting::DefaultListSubmodules(self.parse_set_bool()?))
+      }
+      Keyword::DefaultListUnsorted => Some(Setting::DefaultListUnsorted(self.parse_set_bool()?)),
       Keyword::DefaultScript => Some(Setting::DefaultScript(self.parse_set_bool()?)),
       Keyword::DotenvLoad => Some(Setting::DotenvLoad(self.parse_set_bool()?)),
       Keyword::DotenvOverride => Some(Setting::DotenvOverride(self.parse_set_bool()?)),
@@ -1640,6 +1645,27 @@ impl<'run, 'src> Parser<'run, 'src> {
     self.expect(ColonEquals)?;
 
     let set_value = match keyword {
+      Keyword::DefaultListAliasStyle => {
+        Some(Setting::DefaultListAliasStyle(self.parse_expression()?))
+      }
+      Keyword::DefaultListGroups => {
+        self.expect(BracketL)?;
+
+        let mut groups = Vec::new();
+        while !self.next_is(BracketR) {
+          groups.push(self.parse_expression()?);
+
+          if !self.accepted(Comma)? {
+            break;
+          }
+        }
+
+        self.expect(BracketR)?;
+
+        Some(Setting::DefaultListGroups(groups))
+      }
+      Keyword::DefaultListHeading => Some(Setting::DefaultListHeading(self.parse_expression()?)),
+      Keyword::DefaultListPrefix => Some(Setting::DefaultListPrefix(self.parse_expression()?)),
       Keyword::DotenvCommand => Some(Setting::DotenvCommand(self.parse_expression()?)),
       Keyword::DotenvFilename => Some(Setting::DotenvFilename(self.parse_expression()?)),
       Keyword::DotenvPath => Some(Setting::DotenvPath(self.parse_expression()?)),

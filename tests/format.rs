@@ -958,6 +958,30 @@ fn set_shell() {
 }
 
 #[test]
+fn set_default_list_presentation() {
+  assert_dump(
+    r#"
+        set default-list-alias-style := "separate"
+        set default-list-groups := ["build","test",]
+        set default-list-heading := "Tasks:\n"
+        set default-list-no-aliases := false
+        set default-list-prefix := "-> "
+        set default-list-submodules
+        set default-list-unsorted
+      "#,
+    r#"
+        set default-list-alias-style := "separate"
+        set default-list-groups := ["build", "test"]
+        set default-list-heading := "Tasks:\n"
+        set default-list-no-aliases := false
+        set default-list-prefix := "-> "
+        set default-list-submodules
+        set default-list-unsorted
+      "#,
+  );
+}
+
+#[test]
 fn comment() {
   assert_dump(
     "

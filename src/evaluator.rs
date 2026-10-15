@@ -78,6 +78,45 @@ impl<'src, 'run> Evaluator<'src, 'run> {
         Setting::DefaultList(value) => {
           settings.default_list = value;
         }
+        Setting::DefaultListAliasStyle(value) => {
+          let value = self.evaluate_string_const(&value, StringContext::Setting(set.name))?;
+          settings.default_list_alias_style = Some(match value.as_str() {
+            "left" => AliasStyle::Left,
+            "right" => AliasStyle::Right,
+            "separate" => AliasStyle::Separate,
+            _ => {
+              return Err(
+                set
+                  .name
+                  .error(CompileErrorKind::InvalidDefaultListAliasStyle { value }),
+              );
+            }
+          });
+        }
+        Setting::DefaultListGroups(values) => {
+          for value in values {
+            settings
+              .default_list_groups
+              .push(self.evaluate_string_const(&value, StringContext::Setting(set.name))?);
+          }
+        }
+        Setting::DefaultListHeading(value) => {
+          settings.default_list_heading =
+            Some(self.evaluate_string_const(&value, StringContext::Setting(set.name))?);
+        }
+        Setting::DefaultListNoAliases(value) => {
+          settings.default_list_no_aliases = value;
+        }
+        Setting::DefaultListPrefix(value) => {
+          settings.default_list_prefix =
+            Some(self.evaluate_string_const(&value, StringContext::Setting(set.name))?);
+        }
+        Setting::DefaultListSubmodules(value) => {
+          settings.default_list_submodules = value;
+        }
+        Setting::DefaultListUnsorted(value) => {
+          settings.default_list_unsorted = value;
+        }
         Setting::DefaultScript(value) => {
           settings.default_script = value;
         }

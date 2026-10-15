@@ -160,6 +160,47 @@ impl Subcommand {
     (config.default_list || submodule.settings.default_list).then_some(path)
   }
 
+  fn default_list_config(config: &Config, justfile: &Justfile, path: &Modulepath) -> Config {
+    let settings = &justfile
+      .submodule(path)
+      .expect("default list module path was previously resolved")
+      .settings;
+
+    let mut config = config.clone();
+
+    if !config.alias_style_overridden
+      && let Some(alias_style) = &settings.default_list_alias_style
+    {
+      config.alias_style = alias_style.clone();
+    }
+
+    config.groups.clone_from(&settings.default_list_groups);
+
+    if !config.list_heading_overridden
+      && let Some(list_heading) = &settings.default_list_heading
+    {
+      config.list_heading.clone_from(list_heading);
+    }
+
+    if !config.no_aliases_overridden {
+      config.no_aliases = settings.default_list_no_aliases;
+    }
+
+    if !config.list_prefix_overridden
+      && let Some(list_prefix) = &settings.default_list_prefix
+    {
+      config.list_prefix.clone_from(list_prefix);
+    }
+
+    config.list_submodules = settings.default_list_submodules;
+
+    if !config.unsorted_overridden {
+      config.unsorted = settings.default_list_unsorted;
+    }
+
+    config
+  }
+
   fn run<'src>(
     config: &Config,
     loader: &'src Loader,
@@ -178,7 +219,8 @@ impl Subcommand {
         );
 
       if let Some(path) = Self::default_list_module(config, justfile, arguments) {
-        return Self::list(config, justfile, &path);
+        let config = Self::default_list_config(config, justfile, &path);
+        return Self::list(&config, justfile, &path);
       }
 
       let result = justfile.run(config, &search, arguments, &compilation.overrides);
@@ -569,10 +611,7 @@ impl Subcommand {
     let mut buffer = Vec::<u8>::new();
 
     Man::new(Arguments::command().mut_arg("list_heading", |arg| {
-      let default = arg.get_default_values()[0]
-        .to_str()
-        .unwrap()
-        .replace('\n', "\\n");
+      let default = Arguments::DEFAULT_LIST_HEADING.replace('\n', "\\n");
       arg.default_value(default)
     }))
     .render(&mut buffer)

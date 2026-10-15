@@ -301,6 +301,10 @@ impl Display for CompileError<'_> {
       InvalidIndentation { message } => {
         write!(f, "{message}")
       }
+      InvalidDefaultListAliasStyle { value } => write!(
+        f,
+        "invalid default list alias style `{value}`: expected `left`, `right`, or `separate`"
+      ),
       InvalidMinimumVersion { source, version } => {
         write!(
           f,

@@ -4025,6 +4025,29 @@ You can also default to listing recipes this behavior by settting the
 environment variable `JUST_DEFAULT_LIST=true` or passing
 `--default-list`<sup>1.52.0</sup>.
 
+The presentation of lists produced by `default-list` can be configured with
+`default-list-*` settings<sup>master</sup>:
+
+```just
+set default-list
+set default-list-alias-style := "separate"
+set default-list-groups := ["build", "test"]
+set default-list-heading := "Cool stuff…\n"
+set default-list-no-aliases
+set default-list-prefix := ".........."
+set default-list-submodules
+set default-list-unsorted
+```
+
+`default-list-alias-style` may be `left`, `right`, or `separate`.
+`default-list-groups` accepts a stable list of constant expressions and does
+not require `set lists`.
+
+These settings apply only to lists implicitly produced by `default-list`.
+Explicit `just --list` invocations are unaffected. When listing a module, only
+that module's settings are used. Command-line options and environment variables
+override the corresponding settings.
+
 
 The heading text can be customized with `--list-heading`:
 
@@ -4851,6 +4874,13 @@ foo:
 | `allow-duplicate-recipes` | boolean | `false` | Allow recipes appearing later in a `justfile` to override earlier recipes with the same name. |
 | `allow-duplicate-variables` | boolean | `false` | Allow variables appearing later in a `justfile` to override earlier variables with the same name. |
 | `default-list` | boolean | `false` | List recipes instead of running the default recipe. |
+| `default-list-alias-style`<sup>master</sup> | string | `right` | Set default list alias display style. |
+| `default-list-groups`<sup>master</sup> | list of strings | `[]` | Only include recipes in the given groups in default lists. |
+| `default-list-heading`<sup>master</sup> | string | `Available recipes:\n` | Print text before default lists. |
+| `default-list-no-aliases`<sup>master</sup> | boolean | `false` | Do not show aliases in default lists. |
+| `default-list-prefix`<sup>master</sup> | string | `    ` | Print text before each default list item. |
+| `default-list-submodules`<sup>master</sup> | boolean | `false` | List recipes in submodules in default lists. |
+| `default-list-unsorted`<sup>master</sup> | boolean | `false` | Return default list entries in source order. |
 | `default-script`<sup>1.52.0</sup> | boolean | `false` | Default recipes to script instead of shell. |
 | `dotenv-command`<sup>1.54.0</sup> | string | - | Run a command and load its output as an environment file. |
 | `dotenv-filename` | string | - | Load a `.env` file with a custom name, if present. |

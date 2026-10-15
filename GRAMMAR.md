@@ -73,6 +73,13 @@ set           : 'set' setting eol
 setting       : 'allow-duplicate-recipes' boolean?
               | 'allow-duplicate-variables' boolean?
               | 'default-list' boolean?
+              | 'default-list-alias-style' ':=' string
+              | 'default-list-groups' ':=' string_list
+              | 'default-list-heading' ':=' string
+              | 'default-list-no-aliases' boolean?
+              | 'default-list-prefix' ':=' string
+              | 'default-list-submodules' boolean?
+              | 'default-list-unsorted' boolean?
               | 'default-script' boolean?
               | 'dotenv-command' ':=' string
               | 'dotenv-filename' ':=' string

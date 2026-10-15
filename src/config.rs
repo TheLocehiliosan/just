@@ -1,8 +1,9 @@
 use super::*;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Config {
   pub(crate) alias_style: AliasStyle,
+  pub(crate) alias_style_overridden: bool,
   pub(crate) allow_missing: bool,
   pub(crate) ceiling: Option<Utf8PathBuf>,
   pub(crate) check: bool,
@@ -23,10 +24,13 @@ pub(crate) struct Config {
   pub(crate) jobs: Option<NonZeroU64>,
   pub(crate) justfile_names: Option<Vec<String>>,
   pub(crate) list_heading: String,
+  pub(crate) list_heading_overridden: bool,
   pub(crate) list_prefix: String,
+  pub(crate) list_prefix_overridden: bool,
   pub(crate) list_submodules: bool,
   pub(crate) load_dotenv: bool,
   pub(crate) no_aliases: bool,
+  pub(crate) no_aliases_overridden: bool,
   pub(crate) no_cache: bool,
   pub(crate) no_dependencies: bool,
   pub(crate) one: bool,
@@ -41,6 +45,7 @@ pub(crate) struct Config {
   pub(crate) timestamp: bool,
   pub(crate) timestamp_format: String,
   pub(crate) unsorted: bool,
+  pub(crate) unsorted_overridden: bool,
   pub(crate) unstable: bool,
   pub(crate) verbosity: Verbosity,
   pub(crate) yes: bool,
@@ -50,6 +55,7 @@ impl Config {
   pub(crate) fn new() -> ConfigResult<Self> {
     Ok(Self {
       alias_style: AliasStyle::Right,
+      alias_style_overridden: false,
       allow_missing: false,
       ceiling: None,
       check: false,
@@ -70,10 +76,13 @@ impl Config {
       jobs: None,
       justfile_names: None,
       list_heading: Arguments::DEFAULT_LIST_HEADING.into(),
+      list_heading_overridden: false,
       list_prefix: Arguments::DEFAULT_LIST_PREFIX.into(),
+      list_prefix_overridden: false,
       list_submodules: false,
       load_dotenv: true,
       no_aliases: false,
+      no_aliases_overridden: false,
       no_cache: false,
       no_dependencies: false,
       one: false,
@@ -90,6 +99,7 @@ impl Config {
       timestamp: false,
       timestamp_format: Arguments::DEFAULT_TIMESTAMP_FORMAT.into(),
       unsorted: false,
+      unsorted_overridden: false,
       unstable: false,
       verbosity: Verbosity::Taciturn,
       yes: false,
@@ -308,9 +318,15 @@ impl Config {
     }
 
     let unstable = arguments.unstable || subcommand == Subcommand::Summary;
+    let alias_style_overridden = arguments.alias_style.is_some();
+    let list_heading_overridden = arguments.list_heading.is_some();
+    let list_prefix_overridden = arguments.list_prefix.is_some();
+    let no_aliases_overridden = arguments.no_aliases.is_some();
+    let unsorted_overridden = arguments.unsorted.is_some();
 
     Ok(Self {
-      alias_style: arguments.alias_style,
+      alias_style: arguments.alias_style.unwrap_or_default(),
+      alias_style_overridden,
       allow_missing: arguments.allow_missing,
       ceiling: arguments.ceiling,
       check: arguments.check,
@@ -330,11 +346,18 @@ impl Config {
       invocation_directory: dir::current_directory()?,
       jobs: arguments.jobs,
       justfile_names: arguments.justfile_names,
-      list_heading: arguments.list_heading,
-      list_prefix: arguments.list_prefix,
+      list_heading: arguments
+        .list_heading
+        .unwrap_or_else(|| Arguments::DEFAULT_LIST_HEADING.into()),
+      list_heading_overridden,
+      list_prefix: arguments
+        .list_prefix
+        .unwrap_or_else(|| Arguments::DEFAULT_LIST_PREFIX.into()),
+      list_prefix_overridden,
       list_submodules: arguments.list_submodules,
       load_dotenv: !arguments.no_dotenv,
-      no_aliases: arguments.no_aliases,
+      no_aliases: arguments.no_aliases.unwrap_or(false),
+      no_aliases_overridden,
       no_cache: arguments.no_cache,
       no_dependencies: arguments.no_deps,
       one: arguments.one,
@@ -354,7 +377,8 @@ impl Config {
       time: arguments.time,
       timestamp: arguments.timestamp,
       timestamp_format: arguments.timestamp_format,
-      unsorted: arguments.unsorted,
+      unsorted: arguments.unsorted.unwrap_or(false),
+      unsorted_overridden,
       unstable,
       verbosity: if arguments.quiet {
         Verbosity::Quiet
@@ -402,6 +426,7 @@ mod tests {
       $(shell_args: $shell_args:expr,)?
       $(subcommand: $subcommand:expr,)?
       $(unsorted: $unsorted:expr,)?
+      $(unsorted_overridden: $unsorted_overridden:expr,)?
       $(unstable: $unstable:expr,)?
       $(verbosity: $verbosity:expr,)?
     } => {
@@ -425,6 +450,7 @@ mod tests {
           $(shell_args: $shell_args,)?
           $(subcommand: $subcommand,)?
           $(unsorted: $unsorted,)?
+          $(unsorted_overridden: $unsorted_overridden,)?
           $(unstable: $unstable,)?
           $(verbosity: $verbosity,)?
           ..testing::config(&[])
@@ -641,12 +667,14 @@ mod tests {
     name: unsorted_long,
     args: ["--unsorted"],
     unsorted: true,
+    unsorted_overridden: true,
   }
 
   test! {
     name: unsorted_short,
     args: ["-u"],
     unsorted: true,
+    unsorted_overridden: true,
   }
 
   test! {

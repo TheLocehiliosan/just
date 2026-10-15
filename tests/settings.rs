@@ -22,12 +22,33 @@ fn invalid_attribute() {
 }
 
 #[test]
+fn invalid_default_list_alias_style() {
+  Test::new()
+    .justfile("set default-list-alias-style := 'middle'")
+    .stderr(
+      "
+        error: invalid default list alias style `middle`: expected `left`, `right`, or `separate`
+         ——▶ justfile:1:5
+          │
+        1 │ set default-list-alias-style := 'middle'
+          │     ^^^^^^^^^^^^^^^^^^^^^^^^
+      ",
+    )
+    .failure();
+}
+
+#[test]
 fn all_settings_allow_expressions() {
   Test::new()
     .justfile(
       "
         foo := 'hello'
+        style := 'right'
 
+        set default-list-alias-style := style
+        set default-list-groups := [foo, foo]
+        set default-list-heading := foo
+        set default-list-prefix := foo
         set dotenv-filename := foo
         set dotenv-path := foo
         set script-interpreter := [foo, foo, foo]

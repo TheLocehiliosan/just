@@ -297,6 +297,9 @@ impl<'src> Node<'src> for Set<'src> {
       Setting::AllowDuplicateRecipes(value)
       | Setting::AllowDuplicateVariables(value)
       | Setting::DefaultList(value)
+      | Setting::DefaultListNoAliases(value)
+      | Setting::DefaultListSubmodules(value)
+      | Setting::DefaultListUnsorted(value)
       | Setting::DefaultScript(value)
       | Setting::DotenvLoad(value)
       | Setting::DotenvOverride(value)
@@ -315,7 +318,10 @@ impl<'src> Node<'src> for Set<'src> {
       | Setting::WindowsPowerShell(value) => {
         set.push_mut(value.to_string());
       }
-      Setting::DotenvCommand(value)
+      Setting::DefaultListAliasStyle(value)
+      | Setting::DefaultListHeading(value)
+      | Setting::DefaultListPrefix(value)
+      | Setting::DotenvCommand(value)
       | Setting::DotenvFilename(value)
       | Setting::DotenvPath(value)
       | Setting::Tempdir(value)
@@ -324,6 +330,11 @@ impl<'src> Node<'src> for Set<'src> {
       }
       Setting::Indentation(value, _) | Setting::MinimumVersion(value) => {
         set.push_mut(Tree::string(&value.cooked));
+      }
+      Setting::DefaultListGroups(values) => {
+        for value in values {
+          set.push_mut(value.tree());
+        }
       }
       Setting::ScriptInterpreter(Interpreter { command, arguments })
       | Setting::Shell(Interpreter { command, arguments })
