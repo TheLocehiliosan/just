@@ -4021,7 +4021,7 @@ set default-list := true
 The setting is per-module, so invoking a module path with `default-list`
 enabled lists that module's recipes.
 
-You can also default to listing recipes this behavior by settting the
+You can also default to listing recipes this behavior by setting the
 environment variable `JUST_DEFAULT_LIST=true` or passing
 `--default-list`<sup>1.52.0</sup>.
 
